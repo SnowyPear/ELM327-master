@@ -1,0 +1,98 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+
+    <TextView
+        android:id="@+id/tvConnectionStatus"
+        style="@style/connection_status_title"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@android:color/holo_red_dark"
+        android:gravity="center"
+        android:text="@string/BT_connection_status" />
+
+
+    <ProgressBar
+        android:id="@+id/determinateBar"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvConnectionStatus"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginRight="0dp"
+        android:background="@color/background_floating_material_dark"
+        android:indeterminate="false"
+        android:indeterminateOnly="false"
+        android:maxHeight="40dp"
+        android:secondaryProgress="50" />
+
+    <LinearLayout
+        android:id="@+id/llEditor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/background_material_dark"
+        android:gravity="right"
+        android:padding="8dp">
+
+        <ImageButton
+            android:id="@+id/ibSendMessage2"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@color/background_material_dark"
+            android:contentDescription="@string/imageView"
+            android:src="@android:drawable/stat_sys_data_bluetooth"
+            android:theme="@android:style/Widget.Holo.ImageButton" />
+
+        <ImageButton
+            android:id="@+id/ibSendMessage3"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@color/background_material_dark"
+            android:contentDescription="@string/imageView"
+            android:src="@android:drawable/stat_sys_download_done"
+            android:theme="@android:style/Widget.Holo.ImageButton" />
+
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/tvMonitor"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/llEditor"
+        android:layout_below="@+id/determinateBar"
+        android:background="@color/background_material_dark"
+        android:fadeScrollbars="true"
+        android:fadingEdge="vertical"
+        android:gravity="bottom"
+        android:padding="8dp"
+        android:scrollbarStyle="insideOverlay"
+        android:scrollbars="vertical"
+        android:text="Target"
+        android:textColor="@android:color/holo_blue_dark" />
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/determinateBar"
+        android:layout_alignBottom="@+id/determinateBar"
+        android:layout_marginStart="-284dp"
+        android:layout_marginLeft="-180dp"
+        android:layout_marginBottom="-381dp"
+        android:layout_toEndOf="@+id/tvMonitor"
+        android:layout_toRightOf="@+id/tvMonitor" />
+
+
+</RelativeLayout>
