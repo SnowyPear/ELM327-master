@@ -62,7 +62,7 @@ public class MainActivity extends ActionBarActivity implements
     
     // Commands
 //    private static final String[] RUN_COMMANDS = {"AT Z", "AT D", "AT L0", "AT S0", "AT H0", "AT SP 0", "0105", "010C"};
-    private static final String[] RUN_COMMANDS = {"AT Z", "AT SP 0", "0105", "010C"};
+    private static final String[] RUN_COMMANDS = {"AT Z", "AT SP 0", "0105", "010C"}; //See about adding more
     private int mCMDPointer = -1;
     private int mCMDInit = 1;
 
