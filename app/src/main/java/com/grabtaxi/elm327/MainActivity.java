@@ -43,6 +43,11 @@ import java.util.Set;
 
 import de.greenrobot.event.EventBus;
 
+/**********************
+
+Testing GitHub commits
+
+ **********************/
 
 public class MainActivity extends ActionBarActivity implements
         PairedDevicesDialog.PairedDeviceDialogListener
