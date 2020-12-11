@@ -740,33 +740,31 @@ public class MainActivity extends ActionBarActivity implements
         buf = decodeResponse(cleanResponse(buf));
         displayLog(buf);
 
-        if (buf.contains("010C410C")) {
-            try {
-                String MSB = buf.substring(0, 2);
-                displayLog("debug msb " + MSB);
-                String LSB = buf.substring(2, 4);
-                displayLog("debug lsb " + LSB);
-                int A = Integer.valueOf(MSB, 16);
-                int B = Integer.valueOf(LSB, 16);
+        try {
+            String MSB = buf.substring(0, 2);
+            displayLog("debug msb " + MSB);
+            String LSB = buf.substring(2, 4);
+            displayLog("debug lsb " + LSB);
+            int A = Integer.valueOf(MSB, 16);
+            int B = Integer.valueOf(LSB, 16);
 
-                int tmpRPM = ((A * 256) + B) / 4;
-                displayLog("debug rpm " + Integer.toString(tmpRPM));
+            int tmpRPM = ((A * 256) + B) / 4;
+            displayLog("debug rpm " + Integer.toString(tmpRPM));
 
-                if (tmpRPM - lastRPM > 8000) {
-                    return -1;
-                }
-                lastRPM = tmpRPM;
-
-                if (lastRPM > maxRPM) {
-                    maxRPM = lastRPM;
-                }
-                mRPM.setProgress(lastRPM);
-                mRPM.setSecondaryProgress(maxRPM);
-
-                return tmpRPM;
-            } catch (IndexOutOfBoundsException | NumberFormatException e) {
-                MyLog.e(TAG, e.getMessage());
+            if (tmpRPM - lastRPM > 8000) {
+                return -1;
             }
+            lastRPM = tmpRPM;
+
+            if (lastRPM > maxRPM) {
+                maxRPM = lastRPM;
+            }
+            mRPM.setProgress(lastRPM);
+            mRPM.setSecondaryProgress(maxRPM);
+
+            return tmpRPM;
+        } catch (IndexOutOfBoundsException | NumberFormatException e) {
+            MyLog.e(TAG, e.getMessage());
         }
         
         return -1;
