@@ -80,19 +80,7 @@
         android:scrollbarStyle="insideOverlay"
         android:scrollbars="vertical"
         android:text="Target"
-        android:textColor="@android:color/holo_blue_dark" />
-
-    <View
-        android:id="@+id/view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/determinateBar"
-        android:layout_alignBottom="@+id/determinateBar"
-        android:layout_marginStart="-284dp"
-        android:layout_marginLeft="-180dp"
-        android:layout_marginBottom="-381dp"
-        android:layout_toEndOf="@+id/tvMonitor"
-        android:layout_toRightOf="@+id/tvMonitor" />
+        android:textColor="@android:color/darker_gray" />
 
 
 </RelativeLayout>

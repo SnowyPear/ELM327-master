@@ -1,5 +1,6 @@
 package com.grabtaxi.elm327;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -8,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.DialogFragment;
@@ -33,6 +35,14 @@ import com.grabtaxi.adapter.PairedListAdapter;
 import com.grabtaxi.dialog.PairedDevicesDialog;
 import com.grabtaxi.utility.MyLog;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -67,7 +77,8 @@ public class MainActivity extends ActionBarActivity implements
     
     // Commands
 //    private static final String[] RUN_COMMANDS = {"AT Z", "AT D", "AT L0", "AT S0", "AT H0", "AT SP 0", "0105", "010C"};
-    private static final String[] RUN_COMMANDS = {"AT Z", "AT SP 0", "0105", "010C"}; // See about adding more
+    //TODO: Edit run commands
+    private static final String[] RUN_COMMANDS = {"AT Z", "AT SP 0", "0105", "010C"};
     private int mCMDPointer = -1;
     private int mCMDInit = 1;
 
@@ -94,6 +105,9 @@ public class MainActivity extends ActionBarActivity implements
     private PairedDevicesDialog dialog;
     private List<BluetoothDevice> mDeviceList;
 
+    // Files
+    private FileWriter CSVwriter;
+
     // Widgets
     private TextView mConnectionStatus;
     private TextView mMonitor;
@@ -109,6 +123,7 @@ public class MainActivity extends ActionBarActivity implements
     private String mConnectedDeviceName;
     private final Handler mMsgHandler = new Handler()
     {
+        @SuppressLint("HandlerLeak")
         @Override
         public void handleMessage(Message msg)
         {
@@ -214,6 +229,12 @@ public class MainActivity extends ActionBarActivity implements
 
         // log
         displayLog("=>\n***************\n     ELM 327 started\n***************");
+
+
+        // File Handler for CSVFile
+//        File root = Environment.getExternalStorageDirectory();
+//        File savefile = new File(root, "save.csv");
+//        CSVwriter = new FileWriter(savefile);
 
         // connect widgets
         mMonitor = (TextView) findViewById(R.id.tvMonitor);
@@ -637,23 +658,22 @@ public class MainActivity extends ActionBarActivity implements
             
             case 2: // CMD: 0105, Engine coolant temperature
                 int ect = showEngineCoolantTemperature(buffer);
-                mSbCmdResp.append("Eng. Coolant Temp is ");
-                mSbCmdResp.append(ect);
-                mSbCmdResp.append((char) 0x00B0);
-                mSbCmdResp.append("C");
-                mSbCmdResp.append(" >>");
                 mSbCmdResp.append(buffer);
-                mSbCmdResp.append("\n");
+                mSbCmdResp.append(">>ct>");
+                mSbCmdResp.append(ect);
+                mSbCmdResp.append("\t\t");
+//                CSVwriter.append(String.valueOf(ect));
+//                CSVwriter.append(",");
                 break;
 
             case 3: // CMD: 010C, EngineRPM
                 int eRPM = showEngineRPM(buffer);
-                mSbCmdResp.append("(Eng. RPM: ");
-                mSbCmdResp.append(eRPM);
-                mSbCmdResp.append(")");
-                mSbCmdResp.append(" >>");
                 mSbCmdResp.append(buffer);
+                mSbCmdResp.append(">>rpm>");
+                mSbCmdResp.append(eRPM);
                 mSbCmdResp.append("\n");
+//                CSVwriter.append(String.valueOf(eRPM));
+//                CSVwriter.append("\n");
                 break;
 
             case 4: // CMD: 010D, Vehicle Speed
@@ -710,9 +730,8 @@ public class MainActivity extends ActionBarActivity implements
     private String cleanResponse(String text)
     {
         text = text.trim();
-        text = text.replace("\t", "");
-        text = text.replace(" ", "");
-        text = text.replace(">", ""); 
+        text = text.replaceAll("\\s" , "");
+        text = text.replaceAll(">"  , "");
         
         return text;
     }
@@ -742,34 +761,38 @@ public class MainActivity extends ActionBarActivity implements
     private int showEngineRPM(String buffer)
     {
         String buf = buffer;
-        buf = decodeResponse(cleanResponse(buf));
+        buf = cleanResponse(buf);
         displayLog(buf);
 
-        try {
-            String MSB = buf.substring(0, 2);
-            displayLog("debug msb " + MSB);
-            String LSB = buf.substring(2, 4);
-            displayLog("debug lsb " + LSB);
-            int A = Integer.valueOf(MSB, 16);
-            int B = Integer.valueOf(LSB, 16);
+        if (buf.contains("410C")) {
+            buf = decodeResponse(buf);
 
-            int tmpRPM = ((A * 256) + B) / 4;
-            displayLog("debug rpm " + Integer.toString(tmpRPM));
+            try {
+                String MSB = buf.substring(0, 2);
+                displayLog("debug msb " + MSB);
+                String LSB = buf.substring(2, 4);
+                displayLog("debug lsb " + LSB);
+                int A = Integer.valueOf(MSB, 16);
+                int B = Integer.valueOf(LSB, 16);
 
-            if (tmpRPM - lastRPM > 8000) {
-                return -1;
+                int tmpRPM = ((A * 256) + B) / 4;
+                displayLog("debug rpm " + Integer.toString(tmpRPM));
+
+                if (tmpRPM - lastRPM > 8000) {
+                    return -1;
+                }
+                lastRPM = tmpRPM;
+
+                if (lastRPM > maxRPM) {
+                    maxRPM = lastRPM;
+                }
+                mRPM.setProgress(lastRPM);
+                mRPM.setSecondaryProgress(maxRPM);
+
+                return tmpRPM;
+            } catch (IndexOutOfBoundsException | NumberFormatException e) {
+                MyLog.e(TAG, e.getMessage());
             }
-            lastRPM = tmpRPM;
-
-            if (lastRPM > maxRPM) {
-                maxRPM = lastRPM;
-            }
-            mRPM.setProgress(lastRPM);
-            mRPM.setSecondaryProgress(maxRPM);
-
-            return tmpRPM;
-        } catch (IndexOutOfBoundsException | NumberFormatException e) {
-            MyLog.e(TAG, e.getMessage());
         }
         
         return -1;
@@ -780,7 +803,7 @@ public class MainActivity extends ActionBarActivity implements
         String buf = buffer;
         buf = cleanResponse(buf);
         
-        if (buf.contains("010D410D"))
+        if (buf.contains("410D"))
         {
             try
             {

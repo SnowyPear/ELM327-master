@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">ELM Scanner</string>
+    <string name="app_name">OBDII Scanner</string>
     <string name="action_scan">Scan around &#8230;</string>
 
     <string name="dialog_title_1">Paired devices</string>
