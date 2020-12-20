@@ -80,7 +80,9 @@
         android:scrollbarStyle="insideOverlay"
         android:scrollbars="vertical"
         android:text="Target"
-        android:textColor="@android:color/darker_gray" />
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp"
+        android:typeface="monospace" />
 
 
 </RelativeLayout>

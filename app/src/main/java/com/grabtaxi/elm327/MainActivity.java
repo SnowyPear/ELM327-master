@@ -78,7 +78,7 @@ public class MainActivity extends ActionBarActivity implements
     // Commands
 //    private static final String[] RUN_COMMANDS = {"AT Z", "AT D", "AT L0", "AT S0", "AT H0", "AT SP 0", "0105", "010C"};
     //TODO: Edit run commands
-    private static final String[] RUN_COMMANDS = {"AT Z", "AT SP 0", "0105", "010C"};
+    private static final String[] RUN_COMMANDS = {"AT Z", "AT SP 0", "0105", "010C", "010D"};
     private int mCMDPointer = -1;
     private int mCMDInit = 1;
 
@@ -658,8 +658,8 @@ public class MainActivity extends ActionBarActivity implements
             
             case 2: // CMD: 0105, Engine coolant temperature
                 int ect = showEngineCoolantTemperature(buffer);
-                mSbCmdResp.append(buffer);
-                mSbCmdResp.append(">>ct>");
+                //mSbCmdResp.append(buffer);
+                mSbCmdResp.append("cot>");
                 mSbCmdResp.append(ect);
                 mSbCmdResp.append("\t\t");
 //                CSVwriter.append(String.valueOf(ect));
@@ -668,21 +668,20 @@ public class MainActivity extends ActionBarActivity implements
 
             case 3: // CMD: 010C, EngineRPM
                 int eRPM = showEngineRPM(buffer);
-                mSbCmdResp.append(buffer);
-                mSbCmdResp.append(">>rpm>");
+                //mSbCmdResp.append(buffer);
+                mSbCmdResp.append(" rpm>");
                 mSbCmdResp.append(eRPM);
-                mSbCmdResp.append("\n");
+                mSbCmdResp.append("\t\t");
 //                CSVwriter.append(String.valueOf(eRPM));
 //                CSVwriter.append("\n");
                 break;
 
             case 4: // CMD: 010D, Vehicle Speed
                 int vs = showVehicleSpeed(buffer);
-                mSbCmdResp.append("R>>");
-                mSbCmdResp.append(buffer);
-                mSbCmdResp.append( " (Vehicle Speed: ");
+                //mSbCmdResp.append(buffer);
+                mSbCmdResp.append(" spd>");
                 mSbCmdResp.append(vs);
-                mSbCmdResp.append("Km/h)");
+                mSbCmdResp.append("mph)");
                 mSbCmdResp.append("\n");
                 break;
             
@@ -702,7 +701,7 @@ public class MainActivity extends ActionBarActivity implements
                 mSbCmdResp.append("\n");
         }
 
-        if(mCMDPointer == 2){
+        if(mCMDPointer == 4){
             mMonitor.setText(mSbCmdResp.toString());
         }
 
@@ -719,9 +718,9 @@ public class MainActivity extends ActionBarActivity implements
     private String decodeResponse(String response)
     {
 
-        if (response.length() > 3)
+        if (response.length() > 8)
         {
-            return response.substring(response.length() - 4);
+            return response.substring(8, response.length());
         }
 
         return "FFFF";
@@ -730,8 +729,8 @@ public class MainActivity extends ActionBarActivity implements
     private String cleanResponse(String text)
     {
         text = text.trim();
-        text = text.replaceAll("\\s" , "");
-        text = text.replaceAll(">"  , "");
+        text = text.replaceAll("\\s+" , "");
+        //text = text.replaceAll(">"  , "");
         
         return text;
     }
@@ -739,20 +738,19 @@ public class MainActivity extends ActionBarActivity implements
     private int showEngineCoolantTemperature(String buffer)
     {
         String buf = buffer;
-        buf = decodeResponse(buf);
 
-        try
-        {
-            String temp = buf.substring(0, 2);
-            int A = Integer.valueOf(temp, 16);
-            A -= 40;
+        if (buf.contains("4105")) {
+            buf = decodeResponse(buf);
+            try {
+                String temp = buf.substring(0, 2);
+                int A = Integer.valueOf(temp, 16);
+                A -= 40;
 
-            lastCoolantTemp = A;
-            return A;
-        }
-        catch (IndexOutOfBoundsException | NumberFormatException e)
-        {
-            MyLog.e(TAG, e.getMessage());
+                lastCoolantTemp = A;
+                return A;
+            } catch (IndexOutOfBoundsException | NumberFormatException e) {
+                MyLog.e(TAG, e.getMessage());
+            }
         }
         
         return -1;
@@ -811,9 +809,10 @@ public class MainActivity extends ActionBarActivity implements
 
                 String temp = buf.substring(4, 6);
 
-                int tmpSpeed = Integer.valueOf(temp, 16);
-                lastSpeed = tmpSpeed;
-                return tmpSpeed;
+                double tmpSpeed = Integer.valueOf(temp, 16);
+                tmpSpeed = tmpSpeed * 0.621371;
+                lastSpeed = (int)tmpSpeed;
+                return (int)tmpSpeed;
             }
             catch (IndexOutOfBoundsException | NumberFormatException e)
             {
@@ -829,7 +828,7 @@ public class MainActivity extends ActionBarActivity implements
         String buf = buffer;
         buf = cleanResponse(buf);
         
-        if (buf.contains("01314131"))
+        if (buf.contains("4131"))
         {
             try
             {
